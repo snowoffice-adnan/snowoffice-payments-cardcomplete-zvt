@@ -2,5 +2,5 @@
 
 public interface IResponseVuNumber
 {
-    string VuNumber { get; set; }
+    string? VuNumber { get; set; }
 }

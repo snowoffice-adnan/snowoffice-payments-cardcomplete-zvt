@@ -2,5 +2,5 @@
 
 public interface IResponseApplicationId
 {
-    string ApplicationId { get; set; }
+    string? ApplicationId { get; set; }
 }

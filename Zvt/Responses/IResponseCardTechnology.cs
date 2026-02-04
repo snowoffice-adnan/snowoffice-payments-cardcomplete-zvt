@@ -2,5 +2,5 @@
 
 public interface IResponseCardTechnology
 {
-    string CardTechnology { get; set; }
+    string? CardTechnology { get; set; }
 }

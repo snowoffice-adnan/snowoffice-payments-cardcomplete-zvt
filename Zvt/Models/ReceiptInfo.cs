@@ -12,7 +12,7 @@ public class ReceiptInfo
     /// <summary>
     /// Content of the receipt
     /// </summary>
-    public string Content { get; set; }
+    public string? Content { get; set; }
     /// <summary>
     /// Confirms that all data has been received (End of receipt)
     /// </summary>

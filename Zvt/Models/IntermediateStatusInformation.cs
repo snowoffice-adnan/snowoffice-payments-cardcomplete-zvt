@@ -4,5 +4,5 @@ namespace Snowoffice.Payments.CardCompleteZvt.Zvt.Models;
 
 public class IntermediateStatusInformation : IResponse, IResponseErrorMessage
 {
-    public string ErrorMessage { get; set; }
+    public string? ErrorMessage { get; set; }
 }

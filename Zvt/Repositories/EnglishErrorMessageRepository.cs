@@ -105,6 +105,6 @@ public class EnglishErrorMessageRepository : IErrorMessageRepository
             return errorMessage;
         }
 
-        return null;
+        return $"Unknown error (0x{errorCode:X2})";
     }
 }

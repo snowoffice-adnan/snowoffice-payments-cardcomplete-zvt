@@ -23,7 +23,7 @@ public class ZvtClient : IDisposable
     private readonly byte[] _passwordData;
 
     private readonly ZvtCommunication _zvtCommunication;
-    private IReceiveHandler _receiveHandler;
+    private readonly IReceiveHandler _receiveHandler;
     private readonly TimeSpan _commandCompletionTimeout;
     private readonly ZvtClientConfig _clientConfig;
 
@@ -32,36 +32,36 @@ public class ZvtClient : IDisposable
     /// <summary>
     /// Receive detailed Information about a transaction
     /// </summary>
-    public event Action<StatusInformation> StatusInformationReceived;
+    public event Action<StatusInformation>? StatusInformationReceived;
 
     /// <summary>
     /// Receive the current transaction status for example 'waiting for card'
     /// </summary>
-    public event Action<string> IntermediateStatusInformationReceived;
+    public event Action<string>? IntermediateStatusInformationReceived;
 
     /// <summary>
     /// Receive single lines of a receipt
     /// </summary>
-    public event Action<PrintLineInfo> LineReceived;
+    public event Action<PrintLineInfo>? LineReceived;
 
     /// <summary>
     /// Receive a full receipt at once
     /// </summary>
-    public event Action<ReceiptInfo> ReceiptReceived;
+    public event Action<ReceiptInfo>? ReceiptReceived;
 
     /// <summary>
     /// When the event is registered it is queries periodically to check if the issue of goods is finished.
     /// Upon successful completion the payment is stored, otherwise an auto reversal is triggered.
     /// For possible return values see CompletionInfoStatus.
     /// </summary>
-    public event Func<CompletionInfo> CompletionDecisionRequested;
+    public event Func<CompletionInfo>? CompletionDecisionRequested;
 
     /// <summary>
     /// Raised when the payment was successful, but before it is stored in the PT. After this event the CompletionDecisionRequested
     /// callback is queries periodically to obtain the completion status. If CompletionDecisionRequested is not registered the payment
     /// is stored immediately in the PT and this event is never raised.
     /// </summary>
-    public event Action<StatusInformation> CompletionStartReceived;
+    public event Action<StatusInformation>? CompletionStartReceived;
 
     #endregion
 
@@ -75,57 +75,35 @@ public class ZvtClient : IDisposable
     /// <param name="zvtCommunication">Inject own ZVT Communication</param>
     public ZvtClient(
         IDeviceCommunication deviceCommunication,
-        ILogger<ZvtClient> logger = default,
-        ZvtClientConfig clientConfig = default,
-        IReceiveHandler receiveHandler = default,
-        ZvtCommunication zvtCommunication = default)
+        ILogger<ZvtClient>? logger = null,
+        ZvtClientConfig? clientConfig = null,
+        IReceiveHandler? receiveHandler = null,
+        ZvtCommunication? zvtCommunication = null)
     {
-        if (logger == null)
-        {
-            logger = new NullLogger<ZvtClient>();
-        }
-        this._logger = logger;
+        this._logger = logger ?? new NullLogger<ZvtClient>();
 
-        if (clientConfig == default)
-        {
-            clientConfig = new ZvtClientConfig();
-        }
+        this._clientConfig = clientConfig ?? new ZvtClientConfig();
+        this._commandCompletionTimeout = this._clientConfig.CommandCompletionTimeout;
 
-        this._commandCompletionTimeout = clientConfig.CommandCompletionTimeout;
-
-        this._passwordData = NumberHelper.IntToBcd(clientConfig.Password);
-        this._clientConfig = clientConfig;
+        this._passwordData = NumberHelper.IntToBcd(this._clientConfig.Password);
 
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-        #region ReceiveHandler
+        var encoding = EncodingHelper.GetEncoding(this._clientConfig.Encoding);
 
-        if (receiveHandler == default)
-        {
-            this.InitializeReceiveHandler(clientConfig.Language, EncodingHelper.GetEncoding(clientConfig.Encoding));
-        }
-        else
-        {
-            this._receiveHandler = receiveHandler;
-            this.RegisterReceiveHandlerEvents();
-        }
+        this._receiveHandler = receiveHandler
+            ?? new ReceiveHandler(
+                this._logger,
+                encoding,
+                this.GetErrorMessageRepository(this._clientConfig.Language),
+                this.GetIntermediateStatusRepository(this._clientConfig.Language));
 
-        #endregion
+        this.RegisterReceiveHandlerEvents();
 
-        #region ZvtCommunication
-
-        if (zvtCommunication == default)
-        {
-            this._zvtCommunication = new ZvtCommunication(logger, deviceCommunication);
-        }
-        else
-        {
-            this._zvtCommunication = zvtCommunication;
-        }
+        this._zvtCommunication = zvtCommunication
+            ?? new ZvtCommunication(this._logger, deviceCommunication);
 
         this.RegisterZvtCommunicationHandlerEvents();
-
-        #endregion
     }
 
     /// <inheritdoc />
@@ -150,20 +128,9 @@ public class ZvtClient : IDisposable
         }
     }
 
-    private CompletionInfo GetCompletionInfo()
+    private CompletionInfo? GetCompletionInfo()
     {
         return this.CompletionDecisionRequested?.Invoke();
-    }
-
-    private void InitializeReceiveHandler(
-        Language language,
-        Encoding encoding)
-    {
-        IErrorMessageRepository errorMessageRepository = this.GetErrorMessageRepository(language);
-        IIntermediateStatusRepository intermediateStatusRepository = this.GetIntermediateStatusRepository(language);
-
-        this._receiveHandler = new ReceiveHandler(this._logger, encoding, errorMessageRepository, intermediateStatusRepository);
-        this.RegisterReceiveHandlerEvents();
     }
 
     private void RegisterZvtCommunicationHandlerEvents()
@@ -721,15 +688,12 @@ public class ZvtClient : IDisposable
     /// <returns></returns>
     public async Task<CommandResponse> CustomCommandAsync(
         byte[] controlFieldData,
-        byte[] packageData = default,
+        byte[]? packageData = null,
         CancellationToken cancellationToken = default)
     {
         this._logger.LogInformation($"{nameof(CustomCommandAsync)} - Execute");
 
-        if (packageData == null)
-        {
-            packageData = Array.Empty<byte>();
-        }
+        packageData ??= Array.Empty<byte>();
 
         var fullPackage = PackageHelper.Create(controlFieldData, packageData);
         return await this.SendCommandAsync(fullPackage, cancellationToken: cancellationToken);

@@ -2,6 +2,6 @@
 
 public interface IResponseCardholderAuthentication
 {
-    string CardholderAuthentication { get; set; }
+    string? CardholderAuthentication { get; set; }
     bool PrintoutNeeded { get; set; }
 }

@@ -2,5 +2,5 @@
 
 public interface IResponseCardType
 {
-    string CardType { get; set; }
+    string? CardType { get; set; }
 }

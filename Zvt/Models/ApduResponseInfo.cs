@@ -8,7 +8,7 @@ public class ApduResponseInfo
     /// <summary>
     /// ControlField
     /// </summary>
-    public byte[] ControlField { get; set; }
+    public byte[]? ControlField { get; set; }
 
     /// <summary>
     /// DataLength
@@ -41,6 +41,7 @@ public class ApduResponseInfo
     /// <returns></returns>
     public bool CanHandle(params byte[] data)
     {
-        return this.ControlField.SequenceEqual(data);
+        return this.ControlField is { Length: 2 }
+            && this.ControlField.SequenceEqual(data);
     }
 }

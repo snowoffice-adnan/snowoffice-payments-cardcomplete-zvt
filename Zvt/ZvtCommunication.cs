@@ -14,20 +14,20 @@ public class ZvtCommunication : IDisposable
     private readonly IDeviceCommunication _deviceCommunication;
     private readonly SemaphoreSlim _processingSyncLock = new SemaphoreSlim(1);
 
-    private CancellationTokenSource _commandCompletionCancellationTokenSource;
-    private byte[] _dataBuffer;
+    private CancellationTokenSource? _commandCompletionCancellationTokenSource;
+    private byte[]? _dataBuffer;
     private bool _waitForCommandCompletion = false;
     private bool _transactionActive = false;
 
     /// <summary>
     /// New data received from the pt device
     /// </summary>
-    public event Func<byte[], ProcessData> DataReceived;
+    public event Func<byte[], ProcessData>? DataReceived;
 
     /// <summary>
     /// A callback which is checked 
     /// </summary>
-    public event Func<CompletionInfo> GetCompletionInfo;
+    public event Func<CompletionInfo?>? GetCompletionInfo;
 
     private readonly byte[] _positiveCompletionData1 = new byte[] { 0x80, 0x00, 0x00 }; //Default
     private readonly byte[] _positiveCompletionData2 = new byte[] { 0x84, 0x00, 0x00 }; //Alternative
@@ -300,29 +300,14 @@ public class ZvtCommunication : IDisposable
     /// </summary>
     protected virtual bool CheckIsPositiveCompletion()
     {
-        if (this._dataBuffer.Length < 3)
-        {
+        if (this._dataBuffer == null || this._dataBuffer.Length < 3)
             return false;
-        }
 
-        var buffer = this._dataBuffer.AsSpan().Slice(0, 3);
+        var buffer = this._dataBuffer.AsSpan(0, 3);
 
-        if (buffer.SequenceEqual(this._positiveCompletionData1))
-        {
-            return true;
-        }
-
-        if (buffer.SequenceEqual(this._positiveCompletionData2))
-        {
-            return true;
-        }
-
-        if (buffer.SequenceEqual(this._positiveCompletionData3))
-        {
-            return true;
-        }
-
-        return false;
+        return buffer.SequenceEqual(this._positiveCompletionData1)
+            || buffer.SequenceEqual(this._positiveCompletionData2)
+            || buffer.SequenceEqual(this._positiveCompletionData3);
     }
 
     /// <summary>
@@ -330,7 +315,7 @@ public class ZvtCommunication : IDisposable
     /// </summary>
     protected virtual bool CheckIsNegativeCompletion()
     {
-        if (this._dataBuffer.Length < 3)
+        if (this._dataBuffer == null || this._dataBuffer.Length < 3)
         {
             return false;
         }
@@ -339,7 +324,6 @@ public class ZvtCommunication : IDisposable
         {
             var errorByte = this._dataBuffer[1];
             this._logger.LogDebug($"{nameof(CheckIsNegativeCompletion)} - ErrorCode:{errorByte:X2}");
-
             return true;
         }
 
@@ -351,20 +335,16 @@ public class ZvtCommunication : IDisposable
     /// </summary>
     protected virtual bool CheckIsNotSupported()
     {
-        if (this._dataBuffer.Length < 3)
+        if (this._dataBuffer == null || this._dataBuffer.Length < 3)
         {
             return false;
         }
 
-        var buffer = this._dataBuffer.AsSpan().Slice(0, 3);
+        var buffer = this._dataBuffer.AsSpan(0, 3);
 
-        if (buffer.SequenceEqual(this._otherCommandData))
-        {
-            return true;
-        }
-
-        return false;
+        return buffer.SequenceEqual(this._otherCommandData);
     }
+
 
     private void ResetDataBuffer()
     {
@@ -373,13 +353,16 @@ public class ZvtCommunication : IDisposable
 
     private void ForwardUnusedBufferData()
     {
+        if (this._dataBuffer == null)
+            return;
+
         if (this._dataBuffer.Length == 3)
         {
             this.ResetDataBuffer();
             return;
         }
 
-        var unusedData = this._dataBuffer.AsSpan().Slice(3).ToArray();
+        var unusedData = this._dataBuffer.AsSpan(3).ToArray();
         this.ProcessData(unusedData);
     }
 }

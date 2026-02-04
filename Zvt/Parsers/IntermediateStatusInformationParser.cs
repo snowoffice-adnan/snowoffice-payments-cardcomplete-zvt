@@ -53,11 +53,10 @@ public class IntermediateStatusInformationParser : IIntermediateStatusInformatio
     {
         if (data.Length == 0)
         {
-            return null;
+            return string.Empty;
         }
 
         var id = data[0];
-        //var timeout = data[1];
 
         //Detect TLV Text
         if (id == 0xFF)
@@ -65,7 +64,7 @@ public class IntermediateStatusInformationParser : IIntermediateStatusInformatio
             if (data.Length <= 3)
             {
                 this._logger.LogError($"{nameof(GetMessage)} - Invalid tlv data length");
-                return null;
+                return string.Empty;
             }
 
             var data1 = data.Slice(2);

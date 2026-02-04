@@ -2,5 +2,5 @@
 
 public interface IResponseErrorMessage
 {
-    string ErrorMessage { get; set; }
+    string? ErrorMessage { get; set; }
 }

@@ -33,22 +33,22 @@ public class ReceiveHandler : IReceiveHandler
     private readonly byte[] _abortCommandControlField = new byte[] { 0x06, 0x1E };
 
     /// <inheritdoc />
-    public event Action<PrintLineInfo> LineReceived;
+    public event Action<PrintLineInfo>? LineReceived;
 
     /// <inheritdoc />
-    public event Action<ReceiptInfo> ReceiptReceived;
+    public event Action<ReceiptInfo>? ReceiptReceived;
 
     /// <inheritdoc />
-    public event Action<StatusInformation> StatusInformationReceived;
+    public event Action<StatusInformation>? StatusInformationReceived;
 
     /// <inheritdoc />
-    public event Action<string> IntermediateStatusInformationReceived;
+    public event Action<string>? IntermediateStatusInformationReceived;
 
     /// <inheritdoc />
-    public event Action<byte[]> CompletionReceived;
+    public event Action<byte[]>? CompletionReceived;
 
     /// <inheritdoc />
-    public event Action<string> AbortReceived;
+    public event Action<string>? AbortReceived;
 
     /// <summary>
     /// ReceiveHandler
@@ -66,39 +66,32 @@ public class ReceiveHandler : IReceiveHandler
         Encoding encoding,
         IErrorMessageRepository errorMessageRepository,
         IIntermediateStatusRepository intermediateStatusRepository,
-        IPrintLineParser printLineParser = default,
-        IPrintTextBlockParser printTextBlockParser = default,
-        IStatusInformationParser statusInformationParser = default,
-        IIntermediateStatusInformationParser intermediateStatusInformationParser = default)
+        IPrintLineParser? printLineParser = default,
+        IPrintTextBlockParser? printTextBlockParser = default,
+        IStatusInformationParser? statusInformationParser = default,
+        IIntermediateStatusInformationParser? intermediateStatusInformationParser = default)
     {
         this._logger = logger;
         this._errorMessageRepository = errorMessageRepository;
 
-        this._printLineParser = printLineParser == default
-            ? new PrintLineParser(logger, encoding)
-            : printLineParser;
+        this._printLineParser = printLineParser ?? new PrintLineParser(logger, encoding);
 
-        this._printTextBlockParser = printTextBlockParser == default
-            ? new PrintTextBlockParser(logger, encoding, errorMessageRepository)
-            : printTextBlockParser;
+        this._printTextBlockParser = printTextBlockParser ?? new PrintTextBlockParser(logger, encoding, errorMessageRepository);
 
-        this._statusInformationParser = statusInformationParser == default
-            ? new StatusInformationParser(logger, encoding, errorMessageRepository)
-            : statusInformationParser;
+        this._statusInformationParser = statusInformationParser ?? new StatusInformationParser(logger, encoding, errorMessageRepository);
 
-        this._intermediateStatusInformationParser = intermediateStatusInformationParser == default
-            ? new IntermediateStatusInformationParser(logger, encoding, intermediateStatusRepository, errorMessageRepository)
-            : intermediateStatusInformationParser;
+        this._intermediateStatusInformationParser =
+            intermediateStatusInformationParser ?? new IntermediateStatusInformationParser(logger, encoding, intermediateStatusRepository, errorMessageRepository);
 
-        this._availableControlFields = new List<byte[]>
-        {
+        this._availableControlFields =
+        [
             this._statusInformationControlField,
             this._intermediateStatusInformationControlField,
             this._printLineControlField,
             this._printTextBlockControlField,
             this._completionCommandControlField,
             this._abortCommandControlField
-        };
+        ];
     }
 
     /// <inheritdoc />
@@ -111,13 +104,14 @@ public class ReceiveHandler : IReceiveHandler
 
         var apduInfo = ApduHelper.GetApduInfo(data);
 
-        Span<byte> apduData = null;
+        Span<byte> apduData = [];
 
         #region Complete apdu package
 
         if (apduInfo.PackageSize == data.Length)
         {
-            if (this._availableControlFields.Any(controlField => Enumerable.SequenceEqual(apduInfo.ControlField, controlField)))
+            if (apduInfo.ControlField is { Length: 2 } &&
+            this._availableControlFields.Any(controlField => apduInfo.ControlField.SequenceEqual(controlField)))
             {
                 this.ResetFragmentInfo();
                 apduData = data.Slice(apduInfo.DataStartIndex, apduInfo.DataLength);

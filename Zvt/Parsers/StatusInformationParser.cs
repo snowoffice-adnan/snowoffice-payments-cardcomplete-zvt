@@ -53,7 +53,7 @@ public class StatusInformationParser : IStatusInformationParser
     }
 
     /// <inheritdoc />
-    public StatusInformation Parse(Span<byte> data)
+    public StatusInformation? Parse(Span<byte> data)
     {
         var statusInformation = new StatusInformation();
 

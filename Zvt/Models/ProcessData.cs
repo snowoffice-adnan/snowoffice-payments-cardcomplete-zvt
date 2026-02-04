@@ -15,5 +15,5 @@ public class ProcessData
     /// <summary>
     /// Current State of the data processing
     /// </summary>
-    public IResponse Response { get; set; } = null;
+    public IResponse? Response { get; set; }
 }

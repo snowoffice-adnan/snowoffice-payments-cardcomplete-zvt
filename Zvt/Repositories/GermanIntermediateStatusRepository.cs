@@ -11,7 +11,7 @@ public class GermanIntermediateStatusRepository : IIntermediateStatusRepository
     /// German IntermediateStatusRepository
     /// </summary>
     /// <param name="additionalStatusCodes"></param>
-    public GermanIntermediateStatusRepository(Dictionary<byte, string> additionalStatusCodes = null)
+    public GermanIntermediateStatusRepository(Dictionary<byte, string>? additionalStatusCodes = null)
     {
         this._statusCodes = new Dictionary<byte, string>
         {
@@ -119,6 +119,7 @@ public class GermanIntermediateStatusRepository : IIntermediateStatusRepository
             return errorMessage;
         }
 
-        return null;
+        return $"Unknown error (0x{errorCode:X2})";
+
     }
 }

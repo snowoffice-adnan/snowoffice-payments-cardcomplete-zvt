@@ -367,7 +367,7 @@ public class BmpParser
         #endregion
     }
 
-    private BmpInfo GetBmpInfo(byte command)
+    private BmpInfo? GetBmpInfo(byte command)
     {
         if (!this._bmpInfos.TryGetValue(command, out var bmpInfo))
         {
@@ -378,7 +378,7 @@ public class BmpParser
         return bmpInfo;
     }
 
-    public bool Parse(Span<byte> data, IResponse response)
+    public bool Parse(Span<byte> data, IResponse? response)
     {
         var currentPosition = 0;
 
@@ -501,7 +501,7 @@ public class BmpParser
         return result;
     }
 
-    private bool ParseErrorCode(byte[] data, IResponse response)
+    private bool ParseErrorCode(byte[] data, IResponse? response)
     {
         var errorMessage = this._errorMessageRepository.GetMessage(data[0]);
         var parsed = false;
@@ -521,7 +521,7 @@ public class BmpParser
         return parsed;
     }
 
-    private bool ParseTime(byte[] data, IResponse response)
+    private bool ParseTime(byte[] data, IResponse? response)
     {
         if (response is IResponseTime typedResponse)
         {
@@ -543,7 +543,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParseExpiryDate(byte[] data, IResponse response)
+    private bool ParseExpiryDate(byte[] data, IResponse? response)
     {
         if (response is IResponseExpiryDate typedResponse)
         {
@@ -573,7 +573,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParseDate(byte[] data, IResponse response)
+    private bool ParseDate(byte[] data, IResponse? response)
     {
         if (response is IResponseDate typedResponse)
         {
@@ -603,7 +603,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParseCardSequenceNumber(byte[] data, IResponse response)
+    private bool ParseCardSequenceNumber(byte[] data, IResponse? response)
     {
         if (response is IResponseCardSequenceNumber typedResponse)
         {
@@ -627,7 +627,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParseCardType(byte[] data, IResponse response)
+    private bool ParseCardType(byte[] data, IResponse? response)
     {
         if (response is IResponseCardType typedResponse)
         {
@@ -649,7 +649,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParseTurnoverRecordNumber(byte[] data, IResponse response)
+    private bool ParseTurnoverRecordNumber(byte[] data, IResponse? response)
     {
         if (response is IResponseTurnoverRecordNumber typedResponse)
         {
@@ -672,7 +672,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParseCurrencyCode(byte[] data, IResponse response)
+    private bool ParseCurrencyCode(byte[] data, IResponse? response)
     {
         if (response is IResponseCurrencyCode typedResponse)
         {
@@ -685,7 +685,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParseTraceNumber(byte[] data, IResponse response)
+    private bool ParseTraceNumber(byte[] data, IResponse? response)
     {
         if (response is IResponseTraceNumber typedResponse)
         {
@@ -698,7 +698,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParseVuNumber(byte[] data, IResponse response)
+    private bool ParseVuNumber(byte[] data, IResponse? response)
     {
         if (response is IResponseVuNumber typedResponse)
         {
@@ -711,7 +711,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParseAuthorisationAttribute(byte[] data, IResponse response)
+    private bool ParseAuthorisationAttribute(byte[] data, IResponse? response)
     {
         if (response is IResponseAidAuthorisationAttribute typedResponse)
         {
@@ -724,7 +724,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParseReceiptNumber(byte[] data, IResponse response)
+    private bool ParseReceiptNumber(byte[] data, IResponse? response)
     {
         if (response is IResponseReceiptNumber typedResponse)
         {
@@ -737,7 +737,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParseAdditionalText(byte[] data, IResponse response)
+    private bool ParseAdditionalText(byte[] data, IResponse? response)
     {
         if (response is IResponseAdditionalText typedResponse)
         {
@@ -750,7 +750,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParseTerminalIdentifier(byte[] data, IResponse response)
+    private bool ParseTerminalIdentifier(byte[] data, IResponse? response)
     {
         if (response is IResponseTerminalIdentifier typedResponse)
         {
@@ -764,7 +764,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParsePanData(byte[] data, IResponse response)
+    private bool ParsePanData(byte[] data, IResponse? response)
     {
         if (response is IResponseCardNumber typedResponse)
         {
@@ -778,7 +778,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParseCardName(byte[] data, IResponse response)
+    private bool ParseCardName(byte[] data, IResponse? response)
     {
         if (response is IResponseCardName typedResponse)
         {
@@ -791,7 +791,7 @@ public class BmpParser
         return false;
     }
 
-    private bool ParseAmount(byte[] data, IResponse response)
+    private bool ParseAmount(byte[] data, IResponse? response)
     {
         if (response is IResponseAmount typedResponse)
         {

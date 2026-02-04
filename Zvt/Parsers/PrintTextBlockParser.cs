@@ -57,7 +57,12 @@ public class PrintTextBlockParser : IPrintTextBlockParser
         if (!this._bmpParser.Parse(data, null))
         {
             this._logger.LogError($"{nameof(Parse)} - Error on parsing data");
-            return null;
+            return new ReceiptInfo
+            {
+                ReceiptType = ReceiptType.Unknown,
+                Content = string.Empty,
+                CompletelyProcessed = false
+            };
         }
 
         return new ReceiptInfo

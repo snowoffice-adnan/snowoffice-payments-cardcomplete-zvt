@@ -2,5 +2,5 @@
 
 public interface IResponseAidAuthorisationAttribute
 {
-    string AidAuthorisationAttribute { get; set; }
+    string? AidAuthorisationAttribute { get; set; }
 }

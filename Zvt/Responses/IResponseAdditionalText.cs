@@ -2,5 +2,5 @@
 
 public interface IResponseAdditionalText
 {
-    string AdditionalText { get; set; }
+    string? AdditionalText { get; set; }
 }

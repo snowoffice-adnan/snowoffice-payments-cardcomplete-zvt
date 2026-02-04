@@ -13,7 +13,7 @@ public class CommandResponse
     /// <summary>
     /// Error Message
     /// </summary>
-    public string ErrorMessage { get; set; }
+    public string? ErrorMessage { get; set; }
 
     /// <inheritdoc />
     public override string ToString()
